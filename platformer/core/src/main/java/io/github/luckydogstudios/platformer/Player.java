@@ -97,7 +97,7 @@ public class Player {
 
     // Makes the player jump by applying an upward impulse.
     public void jump() {
-        body.applyLinearImpulse(new Vector2(0, 0.1f), body.getWorldCenter(), true);
+        body.applyLinearImpulse(new Vector2(0, 0.08f), body.getWorldCenter(), true);
     }
 
     // Moves the player horizontally by applying a force.
