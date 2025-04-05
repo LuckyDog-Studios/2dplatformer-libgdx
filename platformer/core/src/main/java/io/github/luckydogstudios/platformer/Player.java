@@ -65,7 +65,7 @@ public class Player implements Disposable {
 
 
         // Load the sprite sheet image.
-        spriteSheet = new Texture(Gdx.files.internal("sprites/character idle.png"));
+        spriteSheet = new Texture(Gdx.files.internal("sprites/character animation.png"));
 
         int frameWidth = 32;
         int frameHeight = 32;
@@ -83,7 +83,7 @@ public class Player implements Disposable {
         }
 
         // Create an animation with a frame duration (e.g., 0.1 seconds per frame).
-        animation = new Animation<TextureRegion>(0.5f, animationFrames);
+        animation = new Animation<>(0.5f, animationFrames);
         animation.setPlayMode(Animation.PlayMode.LOOP);
 
         stateTime = 0f;
@@ -133,5 +133,6 @@ public class Player implements Disposable {
 
     public void dispose() {
         spriteSheet.dispose();
+
     }
 }
