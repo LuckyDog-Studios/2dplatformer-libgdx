@@ -35,7 +35,7 @@ public class GameScreen implements Screen {
         // Create a Box2D world with gravity (e.g., gravity pointing downwards)
         world = new World(new Vector2(0, -9.8f), true);
         platform = new Platform(world, Core.VIRTUAL_WIDTH/2f, 0.1f, 3.0f, 0.1f);
-        player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.16f, 0.26f, 3, world);
+        player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.32f, 0.32f, 3, world);
 
         world.setContactListener(new GameContactListener(player));
 
@@ -60,7 +60,7 @@ public class GameScreen implements Screen {
 
         core.batch.setProjectionMatrix(core.camera.combined);
         core.batch.begin();
-        player.render(core.batch, shapeDrawer);
+        player.render(core.batch);
         platform.render(core.batch, shapeDrawer);
         core.batch.end();
     }
@@ -77,6 +77,7 @@ public class GameScreen implements Screen {
     }
 
     private void input() {
+        //movement
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE) && !player.isInAir) {
             player.jump();
         } else if(Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -88,6 +89,12 @@ public class GameScreen implements Screen {
         } else {
             player.isMoving = false;
         }
+
+        //quit
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
+        }
+
     }
 
     @Override
@@ -113,5 +120,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         pixel.dispose();
+        player.dispose();
+        world.dispose();
     }
 }

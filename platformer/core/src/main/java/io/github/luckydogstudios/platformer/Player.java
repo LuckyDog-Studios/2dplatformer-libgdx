@@ -2,15 +2,19 @@ package io.github.luckydogstudios.platformer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Disposable;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import static com.badlogic.gdx.math.Interpolation.linear;
 
-public class Player {
+public class Player implements Disposable {
     public boolean isInAir;   // True when the player is airborne.
     public boolean isMoving;  // True when the player is actively moving (input-driven).
 
@@ -19,6 +23,9 @@ public class Player {
     float width, height;
     int health;
     private Body body;
+    private Texture spriteSheet;
+    private Animation<TextureRegion> animation;
+    private float stateTime;
 
     // Constructor: creates a dynamic Box2D body with a main collision fixture and a ground sensor.
     public Player(float x, float y, float width, float height, int health, World world) {
@@ -55,6 +62,31 @@ public class Player {
         Fixture sensorFixture = body.createFixture(sensorFixtureDef);
         sensorFixture.setUserData("groundSensor");
         sensorShape.dispose();
+
+
+        // Load the sprite sheet image.
+        spriteSheet = new Texture(Gdx.files.internal("sprites/character idle.png"));
+
+        int frameWidth = 32;
+        int frameHeight = 32;
+
+        // Split the sheet into a 2D array of TextureRegions.
+        TextureRegion[][] tmpFrames = TextureRegion.split(spriteSheet, frameWidth, frameHeight);
+
+        // Flatten the 2D array into a 1D array (modify based on your sheet layout).
+        TextureRegion[] animationFrames = new TextureRegion[tmpFrames.length * tmpFrames[0].length];
+        int index = 0;
+        for (int i = 0; i < tmpFrames.length; i++) {
+            for (int j = 0; j < tmpFrames[i].length; j++) {
+                animationFrames[index++] = tmpFrames[i][j];
+            }
+        }
+
+        // Create an animation with a frame duration (e.g., 0.1 seconds per frame).
+        animation = new Animation<TextureRegion>(0.5f, animationFrames);
+        animation.setPlayMode(Animation.PlayMode.LOOP);
+
+        stateTime = 0f;
     }
 
     // Set whether the player is grounded (not in air).
@@ -64,6 +96,8 @@ public class Player {
 
     // Update method: syncs the position with the Box2D body and applies deceleration if not moving.
     public void update(float delta) {
+        stateTime += delta;
+
         Vector2 pos = body.getPosition();
         this.x = pos.x;
         this.y = pos.y;
@@ -81,18 +115,10 @@ public class Player {
         body.setLinearVelocity(MathUtils.clamp(xVel, -2f, 2f), yVel);
     }
 
-    // Render method: draws the player as a blue rectangle centered at its current position.
-    public void render(SpriteBatch batch, ShapeDrawer shapeDrawer) {
-        shapeDrawer.filledRectangle(x - (width / 2f), y - (height / 2f), width, height, Color.BLUE);
-        Vector2 sensorPos = body.getWorldPoint(new Vector2(0, -height / 2f));
-        float pixelSize = 0.01f;  // Adjust as needed
-        shapeDrawer.filledRectangle(
-            sensorPos.x - pixelSize / 2f,
-            sensorPos.y - pixelSize / 2f,
-            pixelSize,
-            pixelSize,
-            Color.RED
-        );
+    // Render method: draws the player centered at its current position.
+    public void render(SpriteBatch batch) {
+        TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
+        batch.draw(currentFrame, x - width / 2f, y - height / 2f, width, height);
     }
 
     // Makes the player jump by applying an upward impulse.
@@ -103,5 +129,9 @@ public class Player {
     // Moves the player horizontally by applying a force.
     public void move(float moveSpeed) {
         body.applyForceToCenter(new Vector2(moveSpeed, 0), true);
+    }
+
+    public void dispose() {
+        spriteSheet.dispose();
     }
 }
