@@ -90,6 +90,11 @@ public class GameScreen implements Screen {
             player.isMoving = false;
         }
 
+        // attack
+        if (Gdx.input.justTouched() && player.getCurrentState() != Player.PlayerState.ATTACKING) {
+            player.setPlayerState(Player.PlayerState.ATTACKING);
+        }
+
         //quit
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();

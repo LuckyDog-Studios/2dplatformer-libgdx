@@ -9,8 +9,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import java.util.Arrays;
 
 import static com.badlogic.gdx.math.Interpolation.linear;
 
@@ -24,8 +27,15 @@ public class Player implements Disposable {
     int health;
     private Body body;
     private Texture spriteSheet;
-    private Animation<TextureRegion> animation;
+    private Animation<TextureRegion>[] animations;
     private float stateTime;
+
+    public  PlayerState getCurrentState() {
+        return currentState;
+    }
+
+    enum PlayerState {IDLE, ATTACKING, RUNNING, JUMPING}
+    private PlayerState currentState;
 
     // Constructor: creates a dynamic Box2D body with a main collision fixture and a ground sensor.
     public Player(float x, float y, float width, float height, int health, World world) {
@@ -34,6 +44,8 @@ public class Player implements Disposable {
         this.width = width;
         this.height = height;
         this.health = health;
+        this.currentState = PlayerState.IDLE;
+
 
         // Create the dynamic body.
         BodyDef bodyDef = new BodyDef();
@@ -83,8 +95,12 @@ public class Player implements Disposable {
         }
 
         // Create an animation with a frame duration (e.g., 0.1 seconds per frame).
-        animation = new Animation<>(0.5f, animationFrames);
-        animation.setPlayMode(Animation.PlayMode.LOOP);
+        animations = new Animation[2];
+        animations[0] = new Animation<>(0.5f, Arrays.copyOfRange(animationFrames, 0, 2));
+        animations[0].setPlayMode(Animation.PlayMode.LOOP);
+
+        animations[1] = new Animation<>(0.1f, Arrays.copyOfRange(animationFrames, 3, animationFrames.length));
+        animations[0].setPlayMode(Animation.PlayMode.NORMAL);
 
         stateTime = 0f;
     }
@@ -105,20 +121,40 @@ public class Player implements Disposable {
         float xVel = body.getLinearVelocity().x;
         float yVel = body.getLinearVelocity().y;
 
-        // If not actively moving, decelerate horizontally by interpolating toward 0.
         if (!isMoving) {
-            xVel = linear.apply(xVel, 0, delta * 4f);
-            body.setLinearVelocity(xVel, yVel);
+            xVel = linear.apply(xVel, 0, delta * 4f); // linear interpolate to 0 if not moving
         }
-
-        // Clamp horizontal velocity to keep it within a defined range.
         body.setLinearVelocity(MathUtils.clamp(xVel, -2f, 2f), yVel);
+
+
     }
 
     // Render method: draws the player centered at its current position.
     public void render(SpriteBatch batch) {
-        TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
+        TextureRegion currentFrame = null;
+        if (currentState == PlayerState.IDLE) {
+            currentFrame = animations[0].getKeyFrame(stateTime, true);
+        } else if (currentState == PlayerState.ATTACKING) {
+            currentFrame = animations[1].getKeyFrame(stateTime, false);
+            if (animations[1].isAnimationFinished(stateTime)) {
+                setPlayerState(PlayerState.IDLE);
+                stateTime = 0; // Optionally reset stateTime.
+            }
+        }
+
+        if (body.getLinearVelocity().x < 0f && !currentFrame.isFlipX()) {
+            currentFrame.flip(true, false);
+        } else if (body.getLinearVelocity().x >= 0f && currentFrame.isFlipX()) {
+            currentFrame.flip(true, false);
+        }
+
+
         batch.draw(currentFrame, x - width / 2f, y - height / 2f, width, height);
+    }
+
+    public void setPlayerState(PlayerState state) {
+        this.currentState = state;
+        stateTime = 0;
     }
 
     // Makes the player jump by applying an upward impulse.
