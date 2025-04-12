@@ -6,8 +6,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import io.github.luckydogstudios.platformer.TileMap.TiledGameMap;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -19,6 +21,7 @@ public class GameScreen implements Screen {
     private Player player;
     private World world;
     private Platform platform;
+    private TiledGameMap map;
 
     public GameScreen(Core core) {
         this.core = core;
@@ -38,7 +41,7 @@ public class GameScreen implements Screen {
         player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.32f, 0.32f, 3, world);
 
         world.setContactListener(new GameContactListener(player));
-
+        map = new TiledGameMap();
     }
 
     @Override
@@ -60,6 +63,7 @@ public class GameScreen implements Screen {
 
         core.batch.setProjectionMatrix(core.camera.combined);
         core.batch.begin();
+        map.render(core.camera, core.batch);
         player.render(core.batch);
         platform.render(core.batch, shapeDrawer);
         core.batch.end();

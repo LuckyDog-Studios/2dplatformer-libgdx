@@ -30,7 +30,7 @@ public class Player implements Disposable {
     private Animation<TextureRegion>[] animations;
     private float stateTime;
 
-    public  PlayerState getCurrentState() {
+    public PlayerState getCurrentState() {
         return currentState;
     }
 
