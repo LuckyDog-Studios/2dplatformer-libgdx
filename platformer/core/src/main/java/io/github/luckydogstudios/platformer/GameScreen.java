@@ -1,17 +1,15 @@
 package io.github.luckydogstudios.platformer;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Body;
+import io.github.luckydogstudios.platformer.TileMap.GameMap;
 import io.github.luckydogstudios.platformer.TileMap.TiledGameMap;
 import space.earlygrey.shapedrawer.ShapeDrawer;
-import com.badlogic.gdx.math.Vector2;
 
 public class GameScreen implements Screen {
     final Core core;
@@ -19,9 +17,8 @@ public class GameScreen implements Screen {
     private ShapeDrawer shapeDrawer;
     private Texture pixel;
     private Player player;
-    private World world;
     private Platform platform;
-    private TiledGameMap map;
+    private GameMap map;
 
     public GameScreen(Core core) {
         this.core = core;
@@ -36,12 +33,11 @@ public class GameScreen implements Screen {
 
 
         // Create a Box2D world with gravity (e.g., gravity pointing downwards)
-        world = new World(new Vector2(0, -9.8f), true);
-        platform = new Platform(world, Core.VIRTUAL_WIDTH/2f, 0.1f, 3.0f, 0.1f);
-        player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.32f, 0.32f, 3, world);
+        platform = new Platform(core.world, Core.VIRTUAL_WIDTH/2f, 0.1f, 3.0f, 0.1f);
+        player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.32f, 0.32f, 3, core.world);
 
-        world.setContactListener(new GameContactListener(player));
-        map = new TiledGameMap();
+        core.world.setContactListener(new GameContactListener(player));
+        map = new TiledGameMap(core);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class GameScreen implements Screen {
 
     private void update_physics() {
         float delta = Gdx.graphics.getDeltaTime();
-        world.step(delta, 6, 3);
+        core.world.step(delta, 6, 3);
         player.update(delta);
 
         Vector3 targetPos = new Vector3(player.x, player.y, 0);
@@ -130,6 +126,5 @@ public class GameScreen implements Screen {
     public void dispose() {
         pixel.dispose();
         player.dispose();
-        world.dispose();
     }
 }

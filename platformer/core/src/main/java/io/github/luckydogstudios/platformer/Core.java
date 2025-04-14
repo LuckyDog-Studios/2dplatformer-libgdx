@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -21,6 +23,7 @@ public class Core extends Game {
     public SpriteBatch batch;
     public OrthographicCamera camera;
     public Viewport viewport;
+    public World world;
 
     @Override
     public void create() {
@@ -30,7 +33,7 @@ public class Core extends Game {
         viewport.apply();
 
         camera.position.set(Core.VIRTUAL_WIDTH / 2f, Core.VIRTUAL_HEIGHT / 2f, 0);
-
+        world = new World(new Vector2(0, -9.8f), true);
         this.setScreen(new GameScreen(this));
     }
 
@@ -42,5 +45,6 @@ public class Core extends Game {
     @Override
     public void dispose() {
         batch.dispose();
+        world.dispose();
     }
 }
