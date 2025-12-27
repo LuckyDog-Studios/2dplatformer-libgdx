@@ -31,47 +31,68 @@ public class TiledGameMap extends GameMap{
         tiledMap = new TmxMapLoader().load("maps/platformer.tmx");
         renderer = new OrthogonalTiledMapRenderer(tiledMap);
 
-        // add collisions to tiles
-        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
-        for (int x = 0; x < layer.getWidth(); x++) {
-            for (int y = 0; y < layer.getHeight(); y++) {
-                TiledMapTileLayer.Cell cell = layer.getCell(x,y);
-                if (cell == null) continue;
+        addCollisions();
 
-                TiledMapTile tile = cell.getTile();
-                if (tile == null) continue;
 
-                int tileId = tile.getId();
-                System.out.print(tileId + " ");
-                TileType type = TileType.getTileTypeById(tileId);
-                System.out.println(type.isCollidable() + " " + type);
-                if (type != null && type.isCollidable()) {
-                    float worldX = (x) * TileType.TILE_SIZE;
-                    float worldY = (y - 3) * TileType.TILE_SIZE;
+//        // add collisions to tiles
+//        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+//        for (int x = 0; x < layer.getWidth(); x++) {
+//            for (int y = 0; y < layer.getHeight(); y++) {
+//                TiledMapTileLayer.Cell cell = layer.getCell(x,y);
+//                if (cell == null) continue;
+//
+//                TiledMapTile tile = cell.getTile();
+//                if (tile == null) continue;
+//
+//                int tileId = tile.getId();
+//                TileType type = TileType.getTileTypeById(tileId);
+//
+//                if (type != null && type.isCollidable()) {
+//                    float worldX = (x) * TileType.TILE_SIZE;
+//                    float worldY = (y - 3) * TileType.TILE_SIZE;
+//
+//                    // Create body definition
+//                    BodyDef bodyDef = new BodyDef();
+//                    bodyDef.type = BodyDef.BodyType.StaticBody;
+//                    bodyDef.position.set(
+//                        (worldX + TileType.TILE_SIZE / 2f) / 100,
+//                        (worldY + TileType.TILE_SIZE / 2f) / 100 //ppm is 100
+//                    );
+//                    bodyDef.fixedRotation = true;
+//                    // make fixutre definition
+//                    PolygonShape shape = new PolygonShape();
+//                    shape.setAsBox(TileType.TILE_SIZE / 2f / 100, TileType.TILE_SIZE / 2f / 100);
+//                    FixtureDef fixtureDef = new FixtureDef();
+//                    fixtureDef.shape = shape;
+//                    fixtureDef.friction = 0.8f;
+//                    // create body
+//                    Body body = core.world.createBody(bodyDef);
+//                    body.createFixture(fixtureDef);
+//                    shape.dispose();
+//
+//                    bodies.put(cell, body);
+//                }
+//            }
+//        }
+    }
 
-                    // Create body definition
-                    BodyDef bodyDef = new BodyDef();
-                    bodyDef.type = BodyDef.BodyType.StaticBody;
-                    bodyDef.position.set(
-                        (worldX + TileType.TILE_SIZE / 2f) / 100,
-                        (worldY + TileType.TILE_SIZE / 2f) / 100 //ppm is 100
-                    );
-                    bodyDef.fixedRotation = true;
-                    // make fixutre definition
-                    PolygonShape shape = new PolygonShape();
-                    shape.setAsBox(TileType.TILE_SIZE / 2f / 100, TileType.TILE_SIZE / 2f / 100);
-                    FixtureDef fixtureDef = new FixtureDef();
-                    fixtureDef.shape = shape;
-                    fixtureDef.friction = 0.8f;
-                    // create body
-                    Body body = core.world.createBody(bodyDef);
-                    body.createFixture(fixtureDef);
-                    shape.dispose();
+    private void addCollisions() {
+        float ts = TileType.TILE_SIZE;
 
-                    bodies.put(cell, body);
-                }
-            }
-        }
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set((0 + (ts*400) / 2f)/ PPM,(-2*ts + (ts) / 4)/ PPM);
+        bodyDef.fixedRotation = true;
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox((ts*400) / 2f / PPM, ts / 2f / PPM);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.friction = 0.8f;
+        // create body
+        Body body = core.world.createBody(bodyDef);
+        body.createFixture(fixtureDef);
+        shape.dispose();
     }
 
     @Override

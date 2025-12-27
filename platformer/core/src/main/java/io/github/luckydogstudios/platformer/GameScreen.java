@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -17,8 +18,8 @@ public class GameScreen implements Screen {
     private ShapeDrawer shapeDrawer;
     private Texture pixel;
     private Player player;
-    private Platform platform;
     private GameMap map;
+    private BatEnemy testEnemy;
 
     public GameScreen(Core core) {
         this.core = core;
@@ -33,11 +34,12 @@ public class GameScreen implements Screen {
 
 
         // Create a Box2D world with gravity (e.g., gravity pointing downwards)
-        platform = new Platform(core.world, Core.VIRTUAL_WIDTH/2f, 0.1f, 3.0f, 0.1f);
         player = new Player(Core.VIRTUAL_WIDTH/2f, Core.VIRTUAL_HEIGHT/2f, 0.32f, 0.32f, 3, core.world);
 
         core.world.setContactListener(new GameContactListener(player));
         map = new TiledGameMap(core);
+
+        testEnemy = new BatEnemy(1,1,1,0,0, player);
     }
 
     @Override
@@ -58,10 +60,11 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         core.batch.setProjectionMatrix(core.camera.combined);
+        core.batch.enableBlending();
         core.batch.begin();
         map.render(core.camera, core.batch);
         player.render(core.batch);
-        platform.render(core.batch, shapeDrawer);
+        testEnemy.render(core.batch);
         core.batch.end();
     }
 
@@ -69,6 +72,7 @@ public class GameScreen implements Screen {
         float delta = Gdx.graphics.getDeltaTime();
         core.world.step(delta, 6, 3);
         player.update(delta);
+        testEnemy.update(delta);
 
         Vector3 targetPos = new Vector3(player.x, player.y, 0);
         Camera camera = core.viewport.getCamera();

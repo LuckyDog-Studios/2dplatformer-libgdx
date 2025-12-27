@@ -1,5 +1,25 @@
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-eclipse.project.name = appName + '-core'
+plugins {
+  id 'java'
+  id 'eclipse'
+}
+
+group = 'com.yourname.game'  // replace with your package
+version = '1.0'
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+}
+
+eclipse {
+  project {
+    name = "${appName}-core"
+  }
+}
 
 dependencies {
   api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
@@ -13,7 +33,7 @@ dependencies {
   api "com.rafaskoberg.gdx:typing-label:$typingLabelVersion"
   api "space.earlygrey:shapedrawer:$shapeDrawerVersion"
 
-  if(enableGraalNative == 'true') {
+  if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
 }
